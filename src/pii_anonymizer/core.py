@@ -1,4 +1,6 @@
 # src/pii_anonymizer/core.py
+import re
+
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 from presidio_anonymizer.entities import OperatorConfig
@@ -39,7 +41,17 @@ OPERATORS = {
     "US_ITIN": OperatorConfig("replace", {"new_value": "[ITIN]"}),
     "US_NATIONAL_ID": OperatorConfig("replace", {"new_value": "[NATIONAL_ID]"}),
     "US_VISA": OperatorConfig("replace", {"new_value": "[VISA]"}),
+    # Additional entities detected by Presidio's default recognizers.
+    # Without these, the tool falls back to a generic <ENTITY_TYPE> placeholder.
+    "NRP": OperatorConfig("replace", {"new_value": "[NAZIONALITA]"}),
+    "UK_NHS": OperatorConfig("replace", {"new_value": "[PHONE]"}),
 }
+
+
+# Regex used to restore newlines that Presidio's PERSON recognizer sometimes
+# swallows when replacing a name. It matches a placeholder immediately followed
+# by an uppercase letter, e.g. "[NAME]Date of Birth" -> "[NAME]\nDate of Birth".
+_MISSING_NEWLINE_PATTERN = re.compile(r"(\[[A-Z_]+\])(?=[A-Z])")
 
 
 def anonymize_text(text: str, language: str = "en") -> str:
@@ -82,4 +94,11 @@ def anonymize_text(text: str, language: str = "en") -> str:
         operators=OPERATORS,
     )
 
-    return anonymized_results.text
+    # Post-processing: Presidio's PERSON recognizer sometimes includes the
+    # trailing newline in its match. When the name is replaced, that newline
+    # is lost, gluing the placeholder to the next line's content. This step
+    # restores a newline when a placeholder is immediately followed by an
+    # uppercase letter.
+    cleaned = _MISSING_NEWLINE_PATTERN.sub(r"\1\n", anonymized_results.text)
+
+    return cleaned

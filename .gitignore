@@ -29,3 +29,10 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# Test files
+test_completo.txt
+test_completo_v2.txt
+test_completo_v3.txt
+test_completo_anonimizzato.txt
+test_input.txt
