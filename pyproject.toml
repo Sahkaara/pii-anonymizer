@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pii-anonymizer"
+version = "0.1.0"
+description = "A CLI tool for identifying and anonymizing personally identifiable information (PII) in text files to ensure GDPR compliance."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+dependencies = [
+    "presidio-analyzer",
+    "presidio-anonymizer",
+    "typer",
+]
+
+[project.scripts]
+pii-anonymizer = "pii_anonymizer.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
