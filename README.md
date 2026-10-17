@@ -480,6 +480,20 @@ The tool helps you comply with GDPR by providing anonymization capabilities, but
 
 ---
 
+## ⚠️ Known Limitations
+
+While `pii-anonymizer` is effective for many common use cases, it relies on Microsoft Presidio and its underlying NLP models, which have some inherent limitations. Below are the currently known issues and edge cases:
+
+- **Entity Confusion**: Presidio's recognizers for certain entities (e.g., `US_NATIONAL_ID`, `US_VISA`, `US_DRIVER_LICENSE`) use overlapping regex patterns. This can cause a visa number to be incorrectly classified as a driver's license, or vice versa. The tool uses the first match it finds, which may not always be the most precise one.
+- **Contextual Misses**: In text with a very high density of PII (e.g., a line with multiple different entities), the analyzer may occasionally miss an entity. For example, a Social Security Number might be detected in one section of a document but missed in another if the surrounding context differs.
+- **False Positives**: Common words or number sequences can sometimes be misclassified. For instance, the word "Annual" might be flagged as a `DATE_TIME`, or a long numeric string might be split into multiple incorrect entities.
+- **PERSON Boundary Issues**: The `PERSON` recognizer sometimes includes trailing whitespace or newlines in its match. While this tool includes a post-processing step to restore lost newlines, the boundary detection is not perfect and may occasionally produce unexpected results.
+- **Language Support**: Out of the box, only English (`en`) is fully supported. Support for other languages requires manual configuration of additional spaCy models.
+
+These limitations are not bugs in the tool itself, but rather characteristics of the underlying NLP and pattern-matching engines. Future updates to Presidio or the addition of custom recognizers may mitigate some of these issues.
+
+---
+
 ## 🗺️ Roadmap
 
 Planned features and improvements:
