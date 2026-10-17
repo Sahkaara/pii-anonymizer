@@ -70,6 +70,15 @@ def anonymize(
             # redirect the result or pipe it into another tool.
             typer.echo(anonymized)
 
+    except UnicodeDecodeError as exc:
+        typer.echo(
+            f"Error: the file '{input_file}' is not valid UTF-8. "
+            f"Please convert it to UTF-8 and try again. "
+            f"Details: {exc}",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
     except ValueError as exc:
         # Raised by `anonymize_text` for unsupported languages.
         typer.echo(f"Error: {exc}", err=True)
